@@ -30,7 +30,7 @@ MAINTAINER_EMAIL = 'mailme@mikkokotila.com'
 URL = 'http://github.com/mikkokotila'
 LICENSE = 'MIT'
 DOWNLOAD_URL = 'https://github.com/mikkokotila/twintel'
-VERSION = '1.2'
+VERSION = '1.3'
 
 try:
     from setuptools import setup
