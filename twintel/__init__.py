@@ -3,7 +3,7 @@ from twintel._methods.flatfile import flatfile
 from twintel._methods.search import search
 from twintel._methods.timeline import timeline
 
-__version__ = "1.2.1"
+__version__ = "1.3.1"
 
 # module level doc-string
 
