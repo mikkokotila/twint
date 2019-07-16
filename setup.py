@@ -30,7 +30,7 @@ MAINTAINER_EMAIL = 'mailme@mikkokotila.com'
 URL = 'http://github.com/mikkokotila'
 LICENSE = 'MIT'
 DOWNLOAD_URL = 'https://github.com/mikkokotila/twintel'
-VERSION = '1.3.1'
+VERSION = '1.4'
 
 try:
     from setuptools import setup
@@ -67,6 +67,8 @@ if __name__ == "__main__":
           classifiers=[
                      'Intended Audience :: Science/Research',
                      'Programming Language :: Python :: 2.7',
+                     'Programming Language :: Python :: 3.5',
+                     'Programming Language :: Python :: 3.6',
                      'Operating System :: POSIX',
                      'Operating System :: Unix',
                      'Operating System :: MacOS'],
