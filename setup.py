@@ -30,7 +30,7 @@ MAINTAINER_EMAIL = 'mailme@mikkokotila.com'
 URL = 'http://github.com/mikkokotila'
 LICENSE = 'MIT'
 DOWNLOAD_URL = 'https://github.com/mikkokotila/twintel'
-VERSION = '1.3'
+VERSION = '1.3.1'
 
 try:
     from setuptools import setup
@@ -39,36 +39,13 @@ except ImportError:
     from distutils.core import setup
 
 
-def check_dependencies():
-    install_requires = []
-
-    try:
-        import pandas
-    except ImportError:
-        install_requires.append('pandas')
-    try:
-        import nltk
-    except ImportError:
-        install_requires.append('nltk')
-    try:
-        import tweepy
-    except ImportError:
-        install_requires.append('tweepy')
-    try:
-        import twython
-    except ImportError:
-        install_requires.append('twython')
-    try:
-        import aiohttp_socks
-    except ImportError:
-        install_requires.append('aiohttp_socks')
-
-    return install_requires
-
+install_requires = ['pandas',
+                    'nltk',
+                    'tweepy',
+                    'twython',
+                    'aiohttp_socks']
 
 if __name__ == "__main__":
-
-    install_requires = check_dependencies()
 
     setup(name=DISTNAME,
           author=MAINTAINER,
@@ -81,6 +58,7 @@ if __name__ == "__main__":
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,
+          setup_requires=['nltk'],
           install_requires=install_requires,
           packages=['twintel',
                     'twintel._methods',
@@ -94,4 +72,4 @@ if __name__ == "__main__":
                      'Operating System :: MacOS'],
           )
 
-os.system('python -m nltk.downloader vader_lexicon')
+    os.system('python -m nltk.downloader vader_lexicon')
