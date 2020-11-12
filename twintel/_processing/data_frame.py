@@ -5,47 +5,55 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 def data_frame(data):
 
-    try:
-        df1 = pd.DataFrame([[tweet.user.statuses_count,
-                             tweet.user.favourites_count,
-                             tweet.user.followers_count,
-                             tweet.user.friends_count,
-                             tweet.user.listed_count] for tweet in data],
-                           columns=('user_tweets',
-                                    'user_favourites',
-                                    'user_followers',
-                                    'user_following',
-                                    'user_listed'))
-    except AttributeError:
-        df1 = pd.DataFrame({
-                            'user_favourites': data['user.favourites_count'],
-                            'user_tweets': data['user.statuses_count'],
-                            'user_followers': data['user.followers_count'],
-                            'user_following': data['user.friends_count'],
-                            'user_listed': data['user.listed_count']})
+    df1 = pd.DataFrame([[tweet.user.statuses_count,
+                        tweet.user.favourites_count,
+                        tweet.user.followers_count,
+                        tweet.user.friends_count,
+                        tweet.user.listed_count,
+                        tweet.user.screen_name,
+                        pd.to_datetime(tweet.user.created_at),
+                        tweet.user.default_profile,
+                        tweet.user.default_profile_image,
+                        tweet.user.description,
+                        tweet.user.location,
+                        tweet.user.time_zone,
+                        tweet.created_at,
+                        tweet.id_str,
+                        tweet.retweet_count,
+                        tweet.favorite_count,
+                        tweet.user.profile_image_url_https] for tweet in data])
 
-    try:
-        df2 = pd.DataFrame([[tweet.user.screen_name, pd.to_datetime(tweet.user.created_at),
-                             tweet.user.default_profile, tweet.user.default_profile_image,
-                             tweet.user.description, tweet.user.location,
-                             tweet.user.time_zone] for tweet in data],
-                             columns=('handle', 'created_at', 'default_profile',
-                                      'egg_account', 'description', 'location', 'timezone'))
+    df1.columns = ('user_tweets',
+                   'user_favourites',
+                   'user_followers',
+                   'user_following',
+                   'user_listed',
+                   'handle',
+                   'user_created_at',
+                   'default_profile',
+                   'egg_account',
+                   'description',
+                   'location',
+                   'timezone',
+                   'tweet_created_at',
+                   'tweet_id',
+                   'retweet_count',
+                   'favorite_count',
+                   'user_image')
 
-    except AttributeError:
-        df2 = pd.DataFrame({
-                        'handle': data['user.screen_name'],
-                        'created_at': pd.to_datetime(data['user.created_at']),
-                        'default_profile': data['user.default_profile'],
-                        'egg_account': data['user.default_profile_image'],
-                        'description': data['user.description'],
-                        'location': data['user.location'],
-                        'timezone': data['user.time_zone']})
-
-    l = []
     l2 = []
 
     data_backup = data
+
+    temp = []
+    for tweet in data:
+        if 'media' in tweet.entities:
+            for image in tweet.entities['media']:
+                temp.append(image['media_url'])
+        else:
+            temp.append(None)
+
+    df1['media'] = temp
 
     try:
 
@@ -98,26 +106,15 @@ def data_frame(data):
 
     data = data_backup
 
-    try:
-        df4['retweet_count'] = [count for count in data.retweet_count]
-        df4['text'] = [text.encode("utf-8") for text in data.text]
+    #try:
+    #    df4['text'] = [tweet.text for tweet in data]
 
-    except:
+    #except: 
+    
+    df4['text'] = [tweet._json['full_text'] for tweet in data]
 
-        try:
-            df4['retweet_count'] = [tweet.retweet_count for tweet in data]
-            df4['text'] = [tweet.text.encode("utf-8") for tweet in data]
-
-        except: 
-            df4['retweet_count'] = np.nan
-            df4['text'] = [tweet.encode("utf-8") for tweet in data.full_text]
-
-
-
-    df = pd.concat([df1, df2, df4], axis=1)
-    del df4, df1, df2, l2, l
-
-        ### COUNTING THE LOW QUALITY SCORE
+    df = pd.concat([df1, df4], axis=1)
+    del df4, df1, l2, l
 
     low_quality = pd.DataFrame({'default_profile': df.default_profile == True,
                                 'egg_account': df.egg_account == True,
@@ -126,7 +123,7 @@ def data_frame(data):
                                 'follows_more': df.user_following > df.user_followers,
                                 'spam_account': df.user_tweets > 50 * df.user_followers,
                                 'many_tweets': df.user_tweets > 50000,
-                                'created_2016': df.created_at.dt.year == 2018,
+                                'created_2016': df.user_created_at.dt.year == 2018,
                                 'many_favorites': df.user_favourites > df.user_tweets,
                                 'few_listed': df.user_listed < df.user_followers / 100})
 
@@ -136,7 +133,7 @@ def data_frame(data):
 
     # COUNTING INFLUENCE SCORE
     try:
-        df5 = pd.DataFrame((pd.to_datetime('today') - df.created_at).dt.days + 2)
+        df5 = pd.DataFrame((pd.to_datetime('today') - df.user_created_at).dt.days + 2)
     except TypeError:
         df5 = pd.DataFrame({'null' : [np.nan for i in range(len(df))]})
 
@@ -158,8 +155,7 @@ def data_frame(data):
     df = pd.concat([df5, df], axis=1)
 
     sid = SentimentIntensityAnalyzer()
-    l = []
-    l = [sid.polarity_scores(tweet.decode("latin-1")).values() for tweet in df.text]
+    l = [sid.polarity_scores(tweet).values() for tweet in df.text]
 
     df6 = pd.DataFrame(l, columns=('compound', 'neu', 'neg', 'pos'))
 

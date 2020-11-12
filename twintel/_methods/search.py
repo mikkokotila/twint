@@ -42,7 +42,8 @@ def search(query, max_tweets=200, language='en'):
             new_tweets = api.search(q=query,
                                     count=count,
                                     max_id=str(last_id - 1),
-                                    lang=language)
+                                    lang=language,
+                                    tweet_mode='extended')
 
             if not new_tweets:
                 break
@@ -52,9 +53,8 @@ def search(query, max_tweets=200, language='en'):
 
         except tweepy.TweepError as e:
             break
-
+    
     df = data_frame(searched_tweets)
-    df.text = df.text.str.decode('utf-8')
     df.meta_keyword = str(query)
 
     return df
